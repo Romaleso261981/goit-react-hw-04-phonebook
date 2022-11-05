@@ -9,15 +9,17 @@ export default function App() {
   const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    console.log(contacts);
-    console.log(filter);
-    try {
-    setContacts({ contacts: JSON.parse(localStorage.getItem('contacts')) });
-  } catch (error) {
-      setContacts({ contacts: [] });
-      setFilter({filter: ""})
-    console.error('Get state error: ', error.message);
+  useEffect((preFilter, preContacts) => {
+    if (preFilter === filter && preContacts === contacts) {
+      console.log(contacts);
+      try {
+      setContacts({ contacts: JSON.parse(localStorage.getItem('contacts')) });
+    } catch (error) {
+        setContacts({ contacts: [] });
+        setFilter({filter: ''})
+      console.error('Get state error: ', error.message);
+    }
+   
   }},[contacts, filter])
 
   // componentDidMount() {
