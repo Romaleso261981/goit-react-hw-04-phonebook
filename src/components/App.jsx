@@ -1,41 +1,37 @@
 import { FilterInput, NotificationSpan } from './AppStyle.js';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Notification from './Notification/Notification';
 // import { nanoid } from 'nanoid';
 import ContactList from './ContactList/ContactList';
 import ContactForm from './ContactForm/ContactForm';
 
 export default function App() {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState(()=>{JSON.parse(localStorage.getItem('contacts'))});
   const [filter, setFilter] = useState('');
+  const firtRenderForm  = useRef(true);
 
-  useEffect((preFilter, preContacts) => {
-    if (preFilter === filter && preContacts === contacts) {
-      console.log(contacts);
-      try {
-      setContacts({ contacts: JSON.parse(localStorage.getItem('contacts')) });
-    } catch (error) {
-        setContacts({ contacts: [] });
-        setFilter({filter: ''})
-      console.error('Get state error: ', error.message);
+  useEffect(() => {
+    const storageContacts = localStorage.getItem('contacts');
+    if (storageContacts) {
+        setContacts(JSON.parse(storageContacts));
     }
-   
-  }},[contacts, filter])
+  }, []);
+  
+  useEffect(() => {
+    if (firtRenderForm.current) {
+      firtRenderForm.current = false;
+      return;
+    }
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  // componentDidMount() {
-   
-  // }
 
-  // componentDidUpdate() {
-  //   const { contacts } = this.state;
-  //   localStorage.setItem('contacts', JSON.stringify(contacts));
-  // }
 
-  // handleChange = e => {
+  // const handleChange = e => {
   //   this.setState({ name: e.target.value });
   // };
   
-  // addContact = contact => {
+  // const addContact = contact => {
   //   const { contacts } = this.state;
   //   if (
   //     contacts.filter(({ number }) => number === contact.number).length !== 0
@@ -51,36 +47,35 @@ export default function App() {
   //   });
   // };
 
-  // deleteContact = id => {
-  //   this.setState(({ contacts }) => {
-  //     const updatedContacts = contacts.filter(contact => contact.id !== id);
-  //     localStorage.setItem('contacts', JSON.stringify(updatedContacts));
-  //     return { ...this.state, contacts: updatedContacts };
-  //   });
+  const deleteContact = (id, contacts) => {
+    console.log(contacts);
+    console.log(id);
+      const updatedContacts = contacts.Filter(contact => contact.id !== id);
+      localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+      setContacts(updatedContacts);
+  };
+
+  // const handleFilter = (e, filter) => {
+  //   setFilter({ filter: e.target.value });
   // };
 
-  // handleFilter = e => {
-  //   this.setState({ filter: e.target.value });
-  // };
-
-  // getFilteredContacts = () => {
-  //   const { contacts, filter } = this.state;
-
+  // const getFilteredContacts = (contacts, filter) => {
   //   return contacts.filter(contact =>
   //     contact.name.toLowerCase().includes(filter.toLowerCase())
   //   );
   // };
 
   
-    const filteredContacts = 0;
+  const filteredContacts = contacts ?? 0;
+  console.log(contacts);
     return (
       <>
         <ContactForm  />
         <FilterInput type="text" />
         {filteredContacts.length > 0 ? (
           <ContactList
-            contactsData={[]}
-            deleteContact={this.deleteContact}
+            contactsData={contacts}
+            deleteContact={deleteContact}
           />
         ) : (
           <NotificationSpan>
