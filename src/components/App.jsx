@@ -1,25 +1,27 @@
 import { FilterInput, NotificationSpan } from './AppStyle.js';
 import { useEffect, useState, useRef } from 'react';
 import Notification from './Notification/Notification';
-// import { nanoid } from 'nanoid';
+import { nanoid } from 'nanoid';
 import ContactList from './ContactList/ContactList';
 import ContactForm from './ContactForm/ContactForm';
 
 export default function App() {
-  const [contacts, setContacts] = useState(()=>{JSON.parse(localStorage.getItem('contacts'))});
+  const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState('');
-  const firtRenderForm  = useRef(true);
+  const firstRenderForm  = useRef(true);
 
   useEffect(() => {
     const storageContacts = localStorage.getItem('contacts');
-    if (storageContacts) {
-        setContacts(JSON.parse(storageContacts));
+    if (storageContacts === null) {
+      setContacts([]);
+    } else if (storageContacts.length > 0 && storageContacts === undefined) {
+      setContacts(JSON.parse(storageContacts));
     }
   }, []);
   
-  useEffect(() => {
-    if (firtRenderForm.current) {
-      firtRenderForm.current = false;
+  useEffect(() => {   
+    if (firstRenderForm.current) {
+      firstRenderForm.current = false;
       return;
     }
     localStorage.setItem('contacts', JSON.stringify(contacts));
@@ -28,50 +30,52 @@ export default function App() {
 
 
   // const handleChange = e => {
-  //   this.setState({ name: e.target.value });
+  //   setFilter(filter = e.target.value)
+  //   console.log(filter);
   // };
   
-  // const addContact = contact => {
-  //   const { contacts } = this.state;
-  //   if (
-  //     contacts.filter(({ number }) => number === contact.number).length !== 0
-  //   ) {
-  //     alert(contact.number + ' this number is already in your phone book');
-  //     return;
-  //   }
-  //   this.setState(prevState => {
-  //     const newContact = { id: nanoid(), ...contact };
-  //     return {
-  //       contacts: [...prevState.contacts, newContact],
-  //     };
-  //   });
-  // };
+  function  addContact(contact){
+    if (
+      contacts.filter(({ number }) => number === contact.number).length !== 0
+    ) {
+      alert(contact.number + ' this number is already in your phone book');
+      return;
+    } else {
+  
+      const newContact = { id: nanoid(), ...contact }
+      setContacts([...contacts, newContact]);
+    }
+  };
 
-  const deleteContact = (id, contacts) => {
-    console.log(contacts);
+  function deleteContact(id, contacts) {
     console.log(id);
-      const updatedContacts = contacts.Filter(contact => contact.id !== id);
+    console.log(contacts);
+    const updatedContacts = contacts.Filter(contact => contact.id !== id);
+    console.log(updatedContacts);
       localStorage.setItem('contacts', JSON.stringify(updatedContacts));
       setContacts(updatedContacts);
   };
 
-  // const handleFilter = (e, filter) => {
-  //   setFilter({ filter: e.target.value });
-  // };
+  const handleFilter = (e) => {
+    console.log("handleFilter");
+    console.log(filter);
+    setFilter(filter = e.target.value)
 
-  // const getFilteredContacts = (contacts, filter) => {
-  //   return contacts.filter(contact =>
-  //     contact.name.toLowerCase().includes(filter.toLowerCase())
-  //   );
-  // };
+  };
+
+  useEffect((contacts, filter) => {
+    console.log(filter);
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    )
+    }, [filter, contacts])
 
   
   const filteredContacts = contacts ?? 0;
-  console.log(contacts);
     return (
       <>
-        <ContactForm  />
-        <FilterInput type="text" />
+        <ContactForm addContact={addContact} />
+        <FilterInput type="text" onChange={handleFilter}/>
         {filteredContacts.length > 0 ? (
           <ContactList
             contactsData={contacts}
