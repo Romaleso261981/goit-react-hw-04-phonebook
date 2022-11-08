@@ -6,16 +6,15 @@ import ContactList from './ContactList/ContactList';
 import ContactForm from './ContactForm/ContactForm';
 
 export const App = () => {
+
   const [contacts, setContacts] = useState(
-    JSON.parse(localStorage.getItem('contacts'))
+    () => JSON.parse(localStorage.getItem('contacts')) ?? []
   );
   const [filter, setFilter] = useState('');
 
-  useEffect(prevContacts => {
-    if (prevContacts !== contacts) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
-  });
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
   // useEffect(
   //   prevContacts => {
